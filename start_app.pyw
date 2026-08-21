@@ -17,6 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent
 PYTHONW = BASE_DIR / "venv" / "Scripts" / "pythonw.exe"
 APP_PY = BASE_DIR / "app.py"
 PORT = 1224
+PID_FILE = BASE_DIR / "data" / "server.pid"
 
 
 def is_port_in_use(port):
@@ -27,6 +28,12 @@ def is_port_in_use(port):
             return s.connect_ex(("127.0.0.1", port)) == 0
     except Exception:
         return False
+
+
+def save_server_pid(pid):
+    """记录本启动器创建的后端进程，供停止器精准关闭。"""
+    PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    PID_FILE.write_text(str(pid), encoding="utf-8")
 
 
 def start_backend():
@@ -41,7 +48,7 @@ def start_backend():
     # 用 subprocess 启动 pythonw.exe（无控制台窗口）
     try:
         CREATE_NO_WINDOW = 0x08000000
-        subprocess.Popen(
+        process = subprocess.Popen(
             [str(PYTHONW), str(APP_PY)],
             cwd=str(BASE_DIR),
             creationflags=CREATE_NO_WINDOW,
@@ -56,6 +63,7 @@ def start_backend():
     for _ in range(20):
         time.sleep(0.5)
         if is_port_in_use(PORT):
+            save_server_pid(process.pid)
             return True
 
     show_msgbox("错误", "后端启动超时，请查看端口 1224 是否被占用")
