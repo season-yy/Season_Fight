@@ -18,6 +18,7 @@ PYTHONW = BASE_DIR / "venv" / "Scripts" / "pythonw.exe"
 APP_PY = BASE_DIR / "app.py"
 PORT = 1224
 PID_FILE = BASE_DIR / "data" / "server.pid"
+APP_WINDOW_TITLE = "Season_Fight · 学习监督"
 
 
 def is_port_in_use(port):
@@ -68,6 +69,44 @@ def start_backend():
 
     show_msgbox("错误", "后端启动超时，请查看端口 1224 是否被占用")
     return False
+
+
+def focus_existing_app_window():
+    """找到已打开的 Season Fight 窗口并将其恢复到前台。"""
+    if os.name != "nt":
+        return False
+
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        found = False
+
+        @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        def visit_window(hwnd, _):
+            nonlocal found
+            if not user32.IsWindowVisible(hwnd):
+                return True
+
+            length = user32.GetWindowTextLengthW(hwnd)
+            if length <= 0:
+                return True
+
+            title = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, title, len(title))
+            if title.value != APP_WINDOW_TITLE:
+                return True
+
+            user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+            user32.SetForegroundWindow(hwnd)
+            found = True
+            return False
+
+        user32.EnumWindows(visit_window, 0)
+        return found
+    except Exception:
+        return False
 
 
 def open_edge():
@@ -183,11 +222,15 @@ def show_msgbox(title, msg):
             pass
 
 
+def launch_app():
+    """启动后端；已有窗口时只唤醒它，不重复创建窗口。"""
+    if start_backend() and not focus_existing_app_window():
+        open_edge()
+
+
 if __name__ == "__main__":
     # 1. 确保桌面快捷方式
     ensure_desktop_shortcut()
 
-    # 2. 启动后端
-    if start_backend():
-        # 3. 打开浏览器
-        open_edge()
+    # 2. 启动后端，并打开或唤醒应用窗口
+    launch_app()

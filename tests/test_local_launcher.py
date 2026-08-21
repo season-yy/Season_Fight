@@ -49,6 +49,17 @@ class DesktopShortcutTests(unittest.TestCase):
 
             self.assertEqual(pid_file.read_text(encoding="utf-8"), "4321")
 
+    def test_second_launch_focuses_existing_window_without_opening_another(self):
+        launcher = load_launcher()
+        with (
+            patch.object(launcher, "start_backend", return_value=True),
+            patch.object(launcher, "focus_existing_app_window", return_value=True),
+            patch.object(launcher, "open_edge") as open_edge,
+        ):
+            launcher.launch_app()
+
+        open_edge.assert_not_called()
+
 
 class StopScriptSafetyTests(unittest.TestCase):
     def test_stops_a_recorded_process_instead_of_all_pythonw_processes(self):
