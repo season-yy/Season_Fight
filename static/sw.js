@@ -3,7 +3,7 @@
  * 离线缓存策略：HTML/CSS/JS 走 cache-first，API 走 network-first
  * ========================================== */
 
-const CACHE_NAME = 'season-fight-v1';
+const CACHE_NAME = 'season-fight-v2';
 const STATIC_ASSETS = [
     '/',
     '/static/css/main.css',

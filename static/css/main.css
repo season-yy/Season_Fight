@@ -1154,13 +1154,14 @@ body {
 /* ====== PC 端适配 ====== */
 @media (min-width: 768px) {
     body {
-        /* 桌面端关闭 body 滚动，内容由 main 自己滚动 */
-        overflow: hidden;
+        /* 使用页面本身滚动，滚轮在内容区任意位置都能生效。 */
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .app-main {
-        height: calc(100vh - 56px);
-        overflow-y: auto;
+        height: auto;
+        overflow: visible;
         padding: 24px 24px calc(24px + var(--nav-height));
         gap: 18px;
     }
