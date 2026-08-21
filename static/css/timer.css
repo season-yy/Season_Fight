@@ -1,0 +1,53 @@
+/* ==========================================
+ * 计时器样式 - 紧凑醒目版本（嵌入卡片内）
+ * ========================================== */
+
+.timer-card {
+    /* 计时器卡片在 main.css 中已定义，此文件只负责细节 */
+    position: relative;
+}
+
+.timer-display {
+    font-family: 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
+    font-size: 64px;
+    font-weight: 900;
+    color: white;
+    text-align: center;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin: 8px 0 12px;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    user-select: none;
+    position: relative;
+    z-index: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 计时中：数字呼吸 */
+.timer-card.is-running .timer-display {
+    animation: timer-pulse 2s ease-in-out infinite;
+}
+
+.timer-card.is-paused .timer-display {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes timer-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 0.95; }
+}
+
+/* 移动端字号 */
+@media (max-width: 480px) {
+    .timer-display {
+        font-size: 56px;
+        letter-spacing: 3px;
+    }
+}
+
+/* 大屏 PC 字号 */
+@media (min-width: 768px) {
+    .timer-display {
+        font-size: 80px;
+    }
+}

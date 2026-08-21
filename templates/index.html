@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Season_Fight">
+    <meta name="description" content="Season_Fight 学习监督应用">
+
+    <title>Season_Fight · 学习监督</title>
+
+    <!-- PWA 配置 -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- 样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/timer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stats.css') }}">
+</head>
+<body>
+
+<!-- ====== 顶部状态栏 ====== -->
+<header class="app-header">
+    <div class="app-header-inner">
+        <div class="brand">
+            <img class="brand-icon" src="{{ url_for('static', filename='icons/icon-512.png') }}" alt="">
+            <div class="brand-text">
+                <div class="brand-name">Season_Fight</div>
+                <div class="brand-date" id="live-date">--</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="live-clock" id="live-clock">--:--</div>
+            <button class="icon-btn" id="btn-info" title="访问信息" aria-label="访问信息">
+                <span>📡</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- ====== 主体内容（手机竖版优先） ====== -->
+<main class="app-main">
+
+    <!-- 1. 计时器卡片（顶部醒目但不抢眼） -->
+    <section class="card timer-card">
+        <div class="timer-status" id="timer-status">
+            <span class="status-dot"></span>
+            <span class="status-text"></span>
+        </div>
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="timer-task-name empty" id="timer-task-name">选择下方任务开始计时</div>
+        <div class="timer-meta">
+            <div class="meta-item">
+                <span class="meta-icon">⏱️</span>
+                <span class="meta-text" id="timer-duration">0 分钟</span>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+                <span class="meta-icon">📅</span>
+                <span class="meta-text" id="timer-date">今日</span>
+            </div>
+        </div>
+        <div class="timer-controls">
+            <button class="action-btn primary" id="btn-complete-timer" disabled>
+                <span class="action-icon">✔</span>
+                <span>完成</span>
+            </button>
+            <button class="action-btn secondary" id="btn-pause-timer" disabled>
+                <span class="action-icon">⏸</span>
+                <span>暂停</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2. 今日统计条（一行 4 个小卡片） -->
+    <section class="stats-bar">
+        <div class="stat-pill stat-success">
+            <div class="stat-num" id="stat-completed">0</div>
+            <div class="stat-label">已完成</div>
+        </div>
+        <div class="stat-pill stat-danger">
+            <div class="stat-num" id="stat-uncompleted">0</div>
+            <div class="stat-label">未完成</div>
+        </div>
+        <div class="stat-pill stat-warning">
+            <div class="stat-num" id="stat-modified">0</div>
+            <div class="stat-label">已修改</div>
+        </div>
+        <div class="stat-pill stat-info">
+            <div class="stat-num" id="stat-rate">0%</div>
+            <div class="stat-label">完成率</div>
+        </div>
+    </section>
+
+    <!-- 3. 激励语卡片 -->
+    <section class="motivation-card" id="motivation-text">
+        开始添加你的第一个任务吧 ✨
+    </section>
+
+    <!-- 4. 任务列表区 -->
+    <section class="task-section">
+        <div class="section-header">
+            <h2 class="section-title">📋 今日任务</h2>
+            <div class="task-tabs">
+                <button class="task-tab active" data-tab="today">今日</button>
+                <button class="task-tab" data-tab="plans">未来</button>
+            </div>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="task-list" id="task-list-container">
+            <div class="loading-tip">加载中...</div>
+        </div>
+
+        <!-- 浮动添加按钮 -->
+        <button class="fab" id="btn-open-add-task" aria-label="添加任务">
+            <span>＋</span>
+        </button>
+    </section>
+
+    <!-- 5. 底部 Tab 内容区（默认隐藏） -->
+    <section class="tab-content" id="tab-content-calendar">
+        <div class="section-header">
+            <h2 class="section-title">📅 日历视图</h2>
+            <div class="calendar-nav">
+                <button class="nav-btn" id="btn-prev-month">‹</button>
+                <span class="calendar-title" id="calendar-title">--</span>
+                <button class="nav-btn" id="btn-next-month">›</button>
+            </div>
+        </div>
+        <div id="calendar-container">加载中...</div>
+        <div class="legend">
+            <span class="legend-item"><span class="dot rate-excellent"></span>优秀</span>
+            <span class="legend-item"><span class="dot rate-good"></span>良好</span>
+            <span class="legend-item"><span class="dot rate-poor"></span>较差</span>
+            <span class="legend-item"><span class="dot rate-failed"></span>失败</span>
+        </div>
+    </section>
+
+    <section class="tab-content" id="tab-content-stats" style="display:none;">
+        <div class="section-header">
+            <h2 class="section-title">📊 统计分析</h2>
+        </div>
+        <div class="stats-grid">
+            <div class="chart-card">
+                <h3>🔑 未完成关键词 Top 10</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chart-keywords"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📂 任务分类占比</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chart-categories"></canvas>
+                </div>
+            </div>
+            <div class="chart-card chart-card-wide">
+                <h3>📈 月度完成率趋势</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chart-monthly"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tab-content" id="tab-content-history" style="display:none;">
+        <div class="section-header">
+            <h2 class="section-title">📜 历史记录</h2>
+        </div>
+        <div id="history-list">加载中...</div>
+    </section>
+</main>
+
+<!-- ====== 底部 Tab 栏 ====== -->
+<nav class="bottom-nav">
+    <button class="nav-item active" data-tab="home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">主页</span>
+    </button>
+    <button class="nav-item" data-tab="calendar">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">日历</span>
+    </button>
+    <button class="nav-item" data-tab="stats">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">统计</span>
+    </button>
+    <button class="nav-item" data-tab="history">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">历史</span>
+    </button>
+</nav>
+
+<!-- ====== 弹窗：添加任务 ====== -->
+<div class="modal" id="modal-add-task" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content modal-bottom">
+        <div class="modal-header">
+            <h3>➕ 添加任务</h3>
+            <button class="modal-close" data-modal="modal-add-task">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>任务名</label>
+                <input type="text" id="task-name" placeholder="例如：深度学习 - Transformer 论文" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>分类</label>
+                <select id="task-category">
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="is-planned">
+                    <span>📅 规划到未来</span>
+                </label>
+                <input type="date" id="planned-date" disabled>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal="modal-add-task">取消</button>
+            <button class="btn btn-primary" id="btn-add-task">添加</button>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 弹窗：编辑任务 ====== -->
+<div class="modal" id="modal-edit" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content modal-bottom">
+        <div class="modal-header">
+            <h3>✏️ 编辑任务</h3>
+            <button class="modal-close" data-modal="modal-edit">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>任务名</label>
+                <input type="text" id="edit-name" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>分类</label>
+                <select id="edit-category">
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>修改理由 <span class="required">*</span></label>
+                <textarea id="edit-reason" rows="3" placeholder="请说明修改原因（必填）..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal="modal-edit">取消</button>
+            <button class="btn btn-primary" id="btn-save-edit">确认修改</button>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 弹窗：删除任务 ====== -->
+<div class="modal" id="modal-delete" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content modal-bottom">
+        <div class="modal-header">
+            <h3>🗑️ 删除任务</h3>
+            <button class="modal-close" data-modal="modal-delete">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="delete-task-info" id="delete-task-info"></div>
+            <div class="form-group">
+                <label>删除理由 <span class="required">*</span></label>
+                <textarea id="delete-reason" rows="3" placeholder="请说明删除原因（必填）..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal="modal-delete">取消</button>
+            <button class="btn btn-danger" id="btn-confirm-delete">确认删除</button>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 弹窗：完成任务庆祝 ====== -->
+<div class="modal" id="modal-celebrate" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content modal-celebrate">
+        <div class="celebrate-emoji">🎉</div>
+        <h2>今日任务全部完成！</h2>
+        <p class="celebrate-sub">来看看你的时间分配：</p>
+        <div class="chart-wrapper">
+            <canvas id="celebrate-pie-chart"></canvas>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" data-modal="modal-celebrate">继续加油</button>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 弹窗：访问信息 ====== -->
+<div class="modal" id="modal-info" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📡 访问信息</h3>
+            <button class="modal-close" data-modal="modal-info">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-row">
+                <span class="info-label">电脑访问：</span>
+                <code id="info-localhost">http://localhost:{{ port }}</code>
+                <button class="btn btn-sm" onclick="copyText('http://localhost:{{ port }}')">复制</button>
+            </div>
+            <div class="info-row">
+                <span class="info-label">手机访问：</span>
+                <code id="info-lan">http://加载中...</code>
+                <button class="btn btn-sm" id="btn-copy-lan">复制</button>
+            </div>
+            <p class="info-hint">💡 手机和电脑必须在同一 WiFi 下才能访问</p>
+            <p class="info-hint" style="margin-top:8px; background:#d4edda; color:#155724;">
+                📱 <strong>PWA 提示：</strong>在浏览器菜单中选择"添加到主屏幕"，可像 APP 一样使用
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" data-modal="modal-info">知道了</button>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 弹窗：日期详情 ====== -->
+<div class="modal" id="modal-day-detail" style="display:none;">
+    <div class="modal-mask"></div>
+    <div class="modal-content modal-large modal-bottom">
+        <div class="modal-header">
+            <h3 id="day-detail-title">日期详情</h3>
+            <button class="modal-close" data-modal="modal-day-detail">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="day-detail-stats" class="detail-stats"></div>
+            <div class="chart-wrapper">
+                <canvas id="day-detail-pie-chart"></canvas>
+            </div>
+            <h4 style="margin: 16px 0 8px;">任务列表</h4>
+            <div id="day-detail-tasks"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 通用 toast ====== -->
+<div id="toast" class="toast"></div>
+
+<!-- ====== JavaScript ====== -->
+<script>
+    window.APP_CONFIG = {
+        categories: {{ categories|tojson }},
+        maxPlanDays: {{ max_plan_days }},
+        port: {{ port }},
+    };
+</script>
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+<!-- Service Worker 注册（PWA 离线缓存） -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(reg => console.log('SW registered:', reg.scope))
+                .catch(err => console.log('SW failed:', err));
+        });
+    }
+</script>
+
+</body>
+</html>

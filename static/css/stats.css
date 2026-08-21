@@ -1,0 +1,70 @@
+/* ==========================================
+ * 统计分析样式 - 移动版
+ * ========================================== */
+
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chart-card {
+    background: var(--bg);
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+}
+
+.chart-card h3 {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 240px;
+    margin: 8px 0;
+}
+
+.chart-card-wide {
+    /* 移动端单列布局，无所谓 wide */
+}
+
+.empty-tip {
+    text-align: center;
+    color: var(--text-light);
+    padding: 32px 20px;
+    font-size: 13px;
+    background: white;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border);
+    line-height: 1.6;
+}
+
+/* ====== 庆祝弹窗饼图 ====== */
+.modal-celebrate .chart-wrapper {
+    height: 260px;
+    margin: 16px 0;
+}
+
+#day-detail-pie-chart {
+    max-height: 260px;
+}
+
+/* ====== 平板/PC 双列 ====== */
+@media (min-width: 768px) {
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .chart-card-wide {
+        grid-column: 1 / -1;
+    }
+    .chart-wrapper {
+        height: 280px;
+    }
+}

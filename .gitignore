@@ -1,0 +1,18 @@
+# Python 虚拟环境与缓存
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# 本地个人学习记录（不上传到 GitHub）
+data/*
+!data/.gitkeep
+
+# 本地开发工具与系统文件
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 运行日志
+*.log

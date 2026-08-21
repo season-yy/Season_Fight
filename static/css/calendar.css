@@ -1,0 +1,205 @@
+/* ==========================================
+ * 日历视图样式 - 紧凑移动版
+ * ========================================== */
+
+.tab-content {
+    background: var(--card);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+/* ====== 日历网格 ====== */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: 6px 2px;
+    font-size: 12px;
+}
+
+.calendar-cell {
+    aspect-ratio: 1;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    min-height: 48px;
+}
+
+.calendar-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.calendar-cell.empty {
+    background: transparent;
+    cursor: default;
+    border: none;
+}
+
+.calendar-cell.empty:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.calendar-cell.no-data {
+    color: var(--text-lighter);
+}
+
+.calendar-cell.rate-excellent {
+    background: linear-gradient(135deg, #d4f4dd 0%, #a8e6b9 100%);
+    border-color: var(--success);
+    color: #1d6e3a;
+}
+
+.calendar-cell.rate-good {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.2) 100%);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.calendar-cell.rate-poor {
+    background: linear-gradient(135deg, #ffe9c4 0%, #ffd699 100%);
+    border-color: var(--warning);
+    color: #b8690e;
+}
+
+.calendar-cell.rate-failed {
+    background: linear-gradient(135deg, #ffd6db 0%, #ffadb5 100%);
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: cell-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes cell-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.calendar-cell.today {
+    box-shadow: 0 0 0 2px var(--info);
+}
+
+.calendar-day-num {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.calendar-rate {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+/* ====== 图例 ====== */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.rate-excellent { background: var(--success); }
+.dot.rate-good { background: var(--primary); }
+.dot.rate-poor { background: var(--warning); }
+.dot.rate-failed { background: var(--danger); }
+
+/* ====== 历史记录列表 ====== */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    background: var(--bg);
+    padding: 14px;
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.history-item:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+    transform: translateX(2px);
+}
+
+.history-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-date {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.history-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-light);
+    flex-wrap: wrap;
+}
+
+.history-rate {
+    font-size: 22px;
+    font-weight: 800;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.history-rate.rate-excellent { color: var(--success); }
+.history-rate.rate-good { color: var(--primary); }
+.history-rate.rate-poor { color: var(--warning); }
+.history-rate.rate-failed { color: var(--danger); }
+
+/* ====== 移动端优化 ====== */
+@media (max-width: 480px) {
+    .calendar-cell {
+        min-height: 42px;
+        padding: 2px;
+    }
+    .calendar-day-num { font-size: 11px; }
+    .calendar-rate { font-size: 9px; }
+}
