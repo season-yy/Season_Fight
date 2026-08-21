@@ -89,10 +89,34 @@ def open_edge():
     webbrowser.open("http://localhost:1224")
 
 
+def _get_windows_desktop_path():
+    """读取 Windows 为当前用户配置的桌面路径。"""
+    if os.name != "nt":
+        return None
+
+    try:
+        import ctypes
+
+        buffer = ctypes.create_unicode_buffer(260)
+        CSIDL_DESKTOPDIRECTORY = 0x0010
+        result = ctypes.windll.shell32.SHGetFolderPathW(
+            None, CSIDL_DESKTOPDIRECTORY, None, 0, buffer
+        )
+        if result == 0 and buffer.value:
+            return Path(buffer.value)
+    except Exception:
+        pass
+    return None
+
+
+def get_desktop_path():
+    """优先使用系统桌面目录；无法读取时采用常见默认位置。"""
+    return _get_windows_desktop_path() or Path.home() / "Desktop"
+
+
 def ensure_desktop_shortcut():
-    r"""自动确保桌面（D:\desk）有 Season_Fight 快捷方式"""
-    # 用户实际桌面在 D:\desk
-    desktop = Path(r"D:\desk")
+    """自动确保当前用户桌面有 Season_Fight 快捷方式。"""
+    desktop = get_desktop_path()
 
     tmp_vbs = BASE_DIR / "_create_shortcut.vbs"
     base_escaped = str(BASE_DIR).replace("\\", "\\\\")
