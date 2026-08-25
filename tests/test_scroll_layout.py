@@ -21,7 +21,7 @@ class DesktopScrollLayoutTests(unittest.TestCase):
 
     def test_new_scroll_css_is_not_hidden_by_the_previous_static_cache(self):
         service_worker = SERVICE_WORKER.read_text(encoding="utf-8")
-        self.assertIn("season-fight-v2", service_worker)
+        self.assertIn("season-fight-v3", service_worker)
 
 
 if __name__ == "__main__":

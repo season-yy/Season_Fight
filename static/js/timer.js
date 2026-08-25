@@ -8,6 +8,7 @@ const Timer = {
     baseSeconds: 0,
     startTimestamp: null,
     isPaused: false,
+    isRequestPending: false,
 
     /** 初始化 */
     init() {
@@ -118,45 +119,53 @@ const Timer = {
     },
 
     /** 暂停 */
-    pause() {
-        if (!this.currentTask || this.isPaused) return;
+    async pause() {
+        if (!this.currentTask || this.isPaused || this.isRequestPending) return;
 
-        if (this.intervalId) clearInterval(this.intervalId);
-        this.intervalId = null;
-
-        const now = Date.now();
-        const elapsed = Math.floor((now - this.startTimestamp) / 1000) + this.baseSeconds;
-        this.baseSeconds = elapsed;
-        this.startTimestamp = null;
-        this.isPaused = true;
-
-        // 视觉提示
-        const card = document.querySelector('.timer-card');
-        if (card) {
-            card.classList.remove('is-running');
-            card.classList.add('is-paused');
-        }
-        this.setStatus('paused');
-        this.updateDisplay(this.baseSeconds);
-
+        this.isRequestPending = true;
         const pauseBtn = document.getElementById('btn-pause-timer');
-        if (pauseBtn) {
-            pauseBtn.querySelector('.action-icon').textContent = '▶';
-            pauseBtn.querySelector('span:last-child').textContent = '继续';
-        }
+        if (pauseBtn) pauseBtn.disabled = true;
 
-        // 调用后端
-        api(`/api/timer/pause/${this.currentTask.id}`, { method: 'POST' })
-            .then(() => showToast('已暂停 ⏸', 'info'))
-            .catch(err => {
-                console.error('暂停失败:', err);
-                showToast('暂停失败', 'error');
-            });
+        try {
+            const data = await api(`/api/timer/pause/${this.currentTask.id}`, { method: 'POST' });
+            this.currentTask = data.task;
+            this.baseSeconds = data.task.duration_seconds || 0;
+            this.startTimestamp = null;
+            this.isPaused = true;
+
+            if (this.intervalId) clearInterval(this.intervalId);
+            this.intervalId = null;
+
+            const card = document.querySelector('.timer-card');
+            if (card) {
+                card.classList.remove('is-running');
+                card.classList.add('is-paused');
+            }
+            this.setStatus('paused');
+            this.updateDisplay(this.baseSeconds);
+
+            if (pauseBtn) {
+                pauseBtn.querySelector('.action-icon').textContent = '▶';
+                pauseBtn.querySelector('span:last-child').textContent = '继续';
+            }
+            showToast('已暂停 ⏸', 'info');
+            if (typeof Tasks !== 'undefined') Tasks.renderToday();
+        } catch (err) {
+            console.error('暂停失败:', err);
+            showToast('暂停失败', 'error');
+        } finally {
+            this.isRequestPending = false;
+            if (pauseBtn && this.currentTask) pauseBtn.disabled = false;
+        }
     },
 
     /** 恢复 */
     async resume() {
-        if (!this.currentTask || !this.isPaused) return;
+        if (!this.currentTask || !this.isPaused || this.isRequestPending) return;
+        this.isRequestPending = true;
+        const pauseBtn = document.getElementById('btn-pause-timer');
+        if (pauseBtn) pauseBtn.disabled = true;
+
         try {
             const data = await api(`/api/timer/start/${this.currentTask.id}`, { method: 'POST' });
             this.start(data.task);
@@ -164,6 +173,9 @@ const Timer = {
             if (typeof Tasks !== 'undefined') Tasks.renderToday();
         } catch (e) {
             showToast('继续失败', 'error');
+        } finally {
+            this.isRequestPending = false;
+            if (pauseBtn && this.currentTask) pauseBtn.disabled = false;
         }
     },
 

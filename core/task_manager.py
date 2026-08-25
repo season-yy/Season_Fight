@@ -174,10 +174,8 @@ def start_task(task_id: str) -> Optional[Dict[str, Any]]:
 
     task['status'] = 'running'
     task['started_at'] = datetime.now().isoformat(timespec='seconds')
-    # 累加之前暂停的时长
-    if 'paused_at' in task and task['paused_at']:
-        task['duration_seconds'] += _elapsed_since(task['paused_at'])
-        task['paused_at'] = None
+    # 暂停期间不计时；工作时长已在 pause_task 中累计。
+    task['paused_at'] = None
     _save_task_back(task, date)
     return task
 
@@ -209,8 +207,6 @@ def complete_task(task_id: str) -> Optional[Dict[str, Any]]:
     # 计算最终时长
     if task['status'] == 'running' and task['started_at']:
         task['duration_seconds'] += _elapsed_since(task['started_at'])
-    elif task.get('paused_at'):
-        task['duration_seconds'] += _elapsed_since(task['paused_at'])
 
     task['status'] = 'completed'
     task['ended_at'] = datetime.now().isoformat(timespec='seconds')
