@@ -10,7 +10,7 @@ from config import (
     HOST, PORT, DEBUG, MAX_PLAN_DAYS, SUGGESTED_CATEGORIES, BASE_DIR,
 )
 from core.task_manager import (
-    load_day, save_day, load_plan, save_plan,
+    load_day, load_day_with_due_plans, save_day, load_plan, save_plan,
     create_task, start_task, pause_task, complete_task,
     update_task, delete_task, auto_end_running_tasks,
     migrate_plans_to_today,
@@ -53,7 +53,7 @@ def index():
 def api_get_tasks():
     """获取某日任务列表"""
     date = request.args.get('date') or datetime.now().strftime('%Y-%m-%d')
-    data = load_day(date)
+    data = load_day_with_due_plans(date)
     return jsonify(data)
 
 
@@ -312,6 +312,11 @@ if __name__ == '__main__':
     logger.info(f'  端口: {PORT}')
     logger.info(f'  数据目录: {BASE_DIR / "data"}')
     logger.info('=' * 60)
+
+    # 补偿应用未在凌晨运行、电脑休眠等情况导致的计划任务漏迁移。
+    migrated_count = migrate_plans_to_today()
+    if migrated_count > 0:
+        logger.info(f'  已迁移 {migrated_count} 个今日计划任务')
 
     # 启动定时任务
     start_scheduler()

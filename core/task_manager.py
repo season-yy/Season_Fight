@@ -371,3 +371,11 @@ def migrate_plans_to_today() -> int:
     # 清空已迁移的计划文件
     plan_file.unlink()
     return migrated
+
+
+def load_day_with_due_plans(date: str) -> Dict[str, Any]:
+    """读取某日任务；读取今天时顺带迁移漏跑的计划任务。"""
+    today = datetime.now().strftime('%Y-%m-%d')
+    if date == today:
+        migrate_plans_to_today()
+    return load_day(date)
