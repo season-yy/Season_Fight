@@ -16,7 +16,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 PYTHONW = BASE_DIR / "venv" / "Scripts" / "pythonw.exe"
 APP_PY = BASE_DIR / "app.py"
-PORT = 1224
+PORT = 12247
 PID_FILE = BASE_DIR / "data" / "server.pid"
 APP_WINDOW_TITLE = "Season_Fight · 学习监督"
 
@@ -67,7 +67,7 @@ def start_backend():
             save_server_pid(process.pid)
             return True
 
-    show_msgbox("错误", "后端启动超时，请查看端口 1224 是否被占用")
+    show_msgbox("错误", "后端启动超时，请查看端口 12247 是否被占用")
     return False
 
 
@@ -120,7 +120,7 @@ def open_edge():
         if os.path.exists(edge):
             try:
                 subprocess.Popen(
-                    [edge, "--app=http://localhost:1224",
+                    [edge, "--app=http://localhost:12247",
                      "--window-size=480,820",
                      "--window-position=300,80"],
                     creationflags=0x08000000,
@@ -128,12 +128,12 @@ def open_edge():
                 return
             except Exception:
                 # --app 失败，尝试 URI scheme
-                os.startfile("microsoft-edge:http://localhost:1224")
+                os.startfile("microsoft-edge:http://localhost:12247")
                 return
 
     # 兜底：默认浏览器
     import webbrowser
-    webbrowser.open("http://localhost:1224")
+    webbrowser.open("http://localhost:12247")
 
 
 def _get_windows_desktop_path():

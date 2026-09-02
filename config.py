@@ -15,7 +15,7 @@ KEYWORDS_CACHE = DATA_DIR / 'keywords_cache.json'
 
 # 网络配置
 HOST = '0.0.0.0'   # 绑定所有网卡，允许手机端访问
-PORT = 1224        # 用户指定的端口（非默认 5000）
+PORT = 12247       # Season Fight 服务端口
 DEBUG = False      # 生产模式，节省内存
 
 # 业务配置

@@ -47,9 +47,9 @@ pip install -r requirements.txt
 python app.py
 ```
 
-打开 `http://localhost:1224` 即可使用。
+打开 `http://localhost:12247` 即可使用。
 
-想在手机上访问时，确保手机和电脑连接同一个 Wi‑Fi，然后打开启动窗口显示的本机 IP 地址，例如：`http://192.168.1.10:1224`。
+想在手机上访问时，确保手机和电脑连接同一个 Wi‑Fi，然后打开启动窗口显示的本机 IP 地址，例如：`http://192.168.1.10:12247`。
 
 ## 使用方式
 
@@ -94,7 +94,7 @@ Season_Fight/
 
 可在 [config.py](config.py) 修改：
 
-- `PORT`：服务端口，默认 `1224`
+- `PORT`：服务端口，默认 `12247`
 - `MAX_PLAN_DAYS`：允许提前规划的天数，默认 `30`
 - `HISTORY_DAYS`：统计默认回顾天数，默认 `30`
 - `SUGGESTED_CATEGORIES`：任务分类建议

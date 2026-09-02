@@ -33,14 +33,14 @@ if errorlevel 1 (
 )
 
 REM Auto-open browser after 2 seconds (let Flask start first)
-start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:1224"
+start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:12247"
 
 echo.
 echo ============================================================
 echo   Season_Fight - Learning Tracker
 echo ============================================================
-echo   PC  access : http://localhost:1224
-echo   Phone access: http://YOUR_LOCAL_IP:1224  (same WiFi)
+echo   PC  access : http://localhost:12247
+echo   Phone access: http://YOUR_LOCAL_IP:12247  (same WiFi)
 echo.
 echo   *** KEEP THIS WINDOW OPEN ***
 echo   *** DO NOT close this window while using the app ***
